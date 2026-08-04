@@ -1,0 +1,130 @@
+import Image from "next/image";
+import Link from "next/link";
+import HeaderScrollBehavior from "./HeaderScrollBehavior";
+import WhatsAppButton from "./WhatsAppButton";
+
+export function Brand({ inverse = false, href = "/concept-b" }) {
+  return (
+    <Link className="brand" href={href} aria-label="DATANGXING Packaging home">
+      <span className="brand-mark"><Image src="/assets/logo-square.jpg" alt="DATANGXING Packaging logo" fill loading="eager" sizes="54px" /></span>
+      <span className="brand-copy"><strong>DATANGXING</strong><small>PACKAGING SOLUTIONS</small></span>
+    </Link>
+  );
+}
+
+export function Header({ dark = false, standalone = false, ctaHref }) {
+  const premiumMenu = true;
+  const sectionPrefix = standalone ? "/concept-b" : "";
+  const resolvedCtaHref = ctaHref || "/inquiry";
+  return (
+    <header className={`site-header ${dark ? "dark" : ""} ${premiumMenu ? "mega-header" : ""}`} data-scroll-header>
+      <HeaderScrollBehavior />
+      <Brand inverse={dark} />
+      <nav className={premiumMenu ? "mega-nav" : ""} aria-label="Primary navigation">
+        {premiumMenu ? (
+          <details className="mega-nav-item">
+            <summary className="mega-toggle" aria-haspopup="true">
+              Products <span className="nav-chevron" aria-hidden="true" />
+            </summary>
+            <div className="mega-menu" aria-label="Products mega menu">
+              <div className="mega-intro">
+                <span>Custom packaging collection</span>
+                <strong>Find the right structure for your brand.</strong>
+                <p>Explore premium packaging by format, market and finishing requirement.</p>
+                <Link href="/products">View all packaging <b>→</b></Link>
+              </div>
+              <div className="mega-column">
+                <span>By packaging type</span>
+                <Link href="/products/rigid-gift-boxes"><strong>Rigid Gift Boxes</strong><small>Magnetic · Drawer · Shoulder</small></Link>
+                <Link href="/products#folding-cartons"><strong>Folding Cartons</strong><small>Retail · Cosmetic · Electronics</small></Link>
+                <Link href="/products#display-packaging"><strong>Display Packaging</strong><small>Counter · POP · Presentation</small></Link>
+                <Link href="/products#paper-bags"><strong>Paper Bags</strong><small>Retail · Gift · Promotional</small></Link>
+              </div>
+              <div className="mega-column compact-links">
+                <span>By industry</span>
+                <Link href="/products#beauty-cosmetics">Beauty & Cosmetics</Link>
+                <Link href="/products#food-gifting">Food & Gifting</Link>
+                <Link href="/products#wine-spirits">Wine & Spirits</Link>
+                <Link href="/products#electronics-packaging">Consumer Electronics</Link>
+                <Link href="/products#luxury-retail">Luxury Retail</Link>
+                <div className="mega-divider" />
+                <span>Our expertise</span>
+                <a href={`${sectionPrefix}#solutions`}>Structure & sampling</a>
+                <a href={`${sectionPrefix}#solutions`}>Print & finishing</a>
+              </div>
+              <Link className="mega-feature" href="/products/rigid-gift-boxes">
+                <span className="mega-feature-image"><Image src="/assets/luxury-gift-box-square.jpg" alt="Featured custom rigid gift box" fill loading="eager" sizes="280px" /></span>
+                <span className="mega-feature-copy"><small>Featured solution</small><strong>Premium rigid boxes</strong><em>Build your custom version →</em></span>
+              </Link>
+            </div>
+          </details>
+        ) : <a href="#products">Products</a>}
+        <a href={`${sectionPrefix}#solutions`}>Solutions</a>
+        <a href={`${sectionPrefix}#factory`}>Factory</a>
+        <a href={`${sectionPrefix}#about`}>About</a>
+        <Link href="/contact">Contact</Link>
+      </nav>
+      <a className="header-cta" href={resolvedCtaHref}>Get a Quote <span>↗</span></a>
+    </header>
+  );
+}
+
+export function SectionTitle({ eyebrow, title, text, align = "left" }) {
+  return (
+    <div className={`section-title ${align}`}>
+      {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+      <h2>{title}</h2>
+      {text && <p>{text}</p>}
+    </div>
+  );
+}
+
+export function Img({ src, alt, className = "" }) {
+  return <div className={`image-shell ${className}`}><Image src={src} alt={alt} fill loading="eager" sizes="(max-width: 900px) 100vw, 50vw" /></div>;
+}
+
+export function QuoteForm({ compact = false, dark = false }) {
+  return (
+    <form className={`quote-form ${compact ? "compact" : ""} ${dark ? "dark" : ""}`} action="#quote" id="quote">
+      <div className="form-head"><span>Start your project</span><strong>Get a response within 24 hours</strong></div>
+      <div className="form-grid">
+        <label><span>Name</span><input name="name" placeholder="Your name" /></label>
+        <label><span>Work email</span><input name="email" type="email" placeholder="name@company.com" /></label>
+        <label><span>Country</span><input name="country" placeholder="Your market" /></label>
+        <label><span>Packaging type</span><select name="type" defaultValue=""><option value="" disabled>Select product</option><option>Rigid gift box</option><option>Folding carton</option><option>Display box</option><option>Paper bag</option></select></label>
+      </div>
+      {!compact && <label className="wide"><span>Project details</span><textarea name="message" placeholder="Size, quantity, material, printing and deadline..." /></label>}
+      <button type="submit">Request a Custom Quote <span>→</span></button>
+      <small>By submitting, you agree to be contacted about your packaging request.</small>
+    </form>
+  );
+}
+
+export const products = [
+  { name: "Rigid Gift Boxes", tag: "Premium / Magnetic / Drawer", image: "/assets/luxury-gift-box.jpg" },
+  { name: "Folding Cartons", tag: "Retail / Cosmetics / Electronics", image: "/assets/retail-cartons.jpg" },
+  { name: "Display Boxes", tag: "Counter / Retail / POP", image: "/assets/display-carton.jpg" },
+  { name: "Paper Bags", tag: "Retail / Festival / Corporate", image: "/assets/festival-paper-bag.jpg" },
+];
+
+export const steps = [
+  ["01", "Share your brief", "Send dimensions, quantity, artwork or a reference sample."],
+  ["02", "Engineer & sample", "We optimize structure, material and finishing for approval."],
+  ["03", "Produce & inspect", "Printing, finishing, assembly and QC managed in one workflow."],
+  ["04", "Pack & deliver", "Export-ready packing and coordinated global shipment."],
+];
+
+export function Footer({ dark = false }) {
+  return (
+    <>
+      <footer className={dark ? "dark" : ""}>
+        <Brand inverse={dark} />
+        <div><strong>Custom Paper Packaging</strong><Link href="/products/rigid-gift-boxes">Rigid Boxes</Link><Link href="/products#folding-cartons">Folding Cartons</Link><Link href="/products#paper-bags">Paper Bags</Link></div>
+        <div><strong>Company</strong><a href="#about">About Us</a><a href="#factory">Factory</a><Link href="/blog">Insights</Link><Link href="/contact">Contact Lynn</Link><Link href="/inquiry">Start an Inquiry</Link></div>
+        <div className="footer-contact"><strong>Let’s build better packaging.</strong><a href="mailto:lynn05052002@gmail.com">lynn05052002@gmail.com</a><span>Shenzhen, Guangdong, China</span></div>
+        <small>© 2026 Shenzhen Datangxing Printing & Packaging Co., Ltd.</small>
+      </footer>
+      <WhatsAppButton />
+    </>
+  );
+}

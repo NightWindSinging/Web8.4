@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.turbo/
+.vercel/
+.pnpm-store/
+.env*
+!.env.example
+*.log
+*.tsbuildinfo
+.DS_Store
+coverage/
+output/
+audit-nav-factory/
+data/cms/database.json
+data/cms/*.tmp
+public/uploads/*
+!public/uploads/.gitkeep
