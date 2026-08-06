@@ -2,6 +2,22 @@ import Image from "next/image";
 import Link from "next/link";
 import HeaderScrollBehavior from "./HeaderScrollBehavior";
 import WhatsAppButton from "./WhatsAppButton";
+import { getNavigationCategories } from "@/lib/cms/public-categories";
+
+const fallbackPackagingTypes = [
+  { name: "Rigid Gift Boxes", description: "Magnetic · Drawer · Shoulder", href: "/products/rigid-gift-boxes" },
+  { name: "Folding Cartons", description: "Retail · Cosmetic · Electronics", href: "/products#folding-cartons" },
+  { name: "Display Packaging", description: "Counter · POP · Presentation", href: "/products#display-packaging" },
+  { name: "Paper Bags", description: "Retail · Gift · Promotional", href: "/products#paper-bags" },
+];
+
+const fallbackIndustries = ["Beauty & Cosmetics", "Food & Gifting", "Wine & Spirits", "Consumer Electronics", "Luxury Retail"].map((name) => ({ name, href: "/products" }));
+
+function menuSummary(value) {
+  if (!value) return "Explore custom packaging solutions";
+  const summary = value.replace(/\s+/g, " ").trim();
+  return summary.length > 54 ? `${summary.slice(0, 54)}…` : summary;
+}
 
 export function Brand({ inverse = false, href = "/concept-b" }) {
   return (
@@ -12,10 +28,29 @@ export function Brand({ inverse = false, href = "/concept-b" }) {
   );
 }
 
-export function Header({ dark = false, standalone = false, ctaHref }) {
+export async function Header({ dark = false, standalone = false, ctaHref = "" }) {
   const premiumMenu = true;
   const sectionPrefix = standalone ? "/concept-b" : "";
   const resolvedCtaHref = ctaHref || "/inquiry";
+  const navigationCategories = await getNavigationCategories();
+  const cmsPackagingTypes = navigationCategories.filter((category) => category.navigationGroup === "PACKAGING_TYPE").map((category) => ({
+    name: category.name,
+    description: menuSummary(category.description),
+    href: `/category/products/${category.slug}`,
+    image: category.navigationImage,
+  }));
+  const cmsIndustries = navigationCategories.filter((category) => category.navigationGroup === "INDUSTRY").map((category) => ({
+    name: category.name,
+    href: `/category/products/${category.slug}`,
+    image: category.navigationImage,
+  }));
+  const packagingTypes = cmsPackagingTypes.length ? cmsPackagingTypes : fallbackPackagingTypes;
+  const industries = cmsIndustries.length ? cmsIndustries : fallbackIndustries;
+  const featured = [...cmsPackagingTypes, ...cmsIndustries].find((category) => category.image) || cmsPackagingTypes[0] || {
+    name: "Premium rigid boxes",
+    href: "/products/rigid-gift-boxes",
+    image: "/assets/luxury-gift-box-square.jpg",
+  };
   return (
     <header className={`site-header ${dark ? "dark" : ""} ${premiumMenu ? "mega-header" : ""}`} data-scroll-header>
       <HeaderScrollBehavior />
@@ -35,26 +70,19 @@ export function Header({ dark = false, standalone = false, ctaHref }) {
               </div>
               <div className="mega-column">
                 <span>By packaging type</span>
-                <Link href="/products/rigid-gift-boxes"><strong>Rigid Gift Boxes</strong><small>Magnetic · Drawer · Shoulder</small></Link>
-                <Link href="/products#folding-cartons"><strong>Folding Cartons</strong><small>Retail · Cosmetic · Electronics</small></Link>
-                <Link href="/products#display-packaging"><strong>Display Packaging</strong><small>Counter · POP · Presentation</small></Link>
-                <Link href="/products#paper-bags"><strong>Paper Bags</strong><small>Retail · Gift · Promotional</small></Link>
+                {packagingTypes.slice(0, 6).map((category) => <Link key={category.href} href={category.href}><strong>{category.name}</strong><small>{category.description}</small></Link>)}
               </div>
               <div className="mega-column compact-links">
                 <span>By industry</span>
-                <Link href="/products#beauty-cosmetics">Beauty & Cosmetics</Link>
-                <Link href="/products#food-gifting">Food & Gifting</Link>
-                <Link href="/products#wine-spirits">Wine & Spirits</Link>
-                <Link href="/products#electronics-packaging">Consumer Electronics</Link>
-                <Link href="/products#luxury-retail">Luxury Retail</Link>
+                {industries.slice(0, 6).map((category) => <Link key={`${category.href}-${category.name}`} href={category.href}>{category.name}</Link>)}
                 <div className="mega-divider" />
                 <span>Our expertise</span>
                 <a href={`${sectionPrefix}#solutions`}>Structure & sampling</a>
                 <a href={`${sectionPrefix}#solutions`}>Print & finishing</a>
               </div>
-              <Link className="mega-feature" href="/products/rigid-gift-boxes">
-                <span className="mega-feature-image"><Image src="/assets/luxury-gift-box-square.jpg" alt="Featured custom rigid gift box" fill loading="eager" sizes="280px" /></span>
-                <span className="mega-feature-copy"><small>Featured solution</small><strong>Premium rigid boxes</strong><em>Build your custom version →</em></span>
+              <Link className="mega-feature" href={featured.href}>
+                <span className="mega-feature-image"><Image src={featured.image || "/assets/luxury-gift-box-square.jpg"} alt={`${featured.name} custom packaging`} fill sizes="280px" /></span>
+                <span className="mega-feature-copy"><small>Featured solution</small><strong>{featured.name}</strong><em>Explore this category →</em></span>
               </Link>
             </div>
           </details>

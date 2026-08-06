@@ -6,10 +6,12 @@ import { Label } from "@/components/admin/ui/label";
 import { Textarea } from "@/components/admin/ui/textarea";
 import { saveSettingsAction } from "@/lib/cms/actions";
 import { readDatabase } from "@/lib/cms/storage";
+import { absoluteUrl } from "@/lib/site-url";
 
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const [database, query] = await Promise.all([readDatabase(), searchParams]);
   const settings = database.settings;
+  const searchConsoleVerified = Boolean(process.env.GOOGLE_SITE_VERIFICATION?.trim());
   return <>
     <AdminPageHeader eyebrow="System" title="系统设置" description="管理网站名称、默认介绍和企业联系信息。" />
     {query.saved ? <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">系统设置已保存。</div> : null}
@@ -18,5 +20,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <Card><CardHeader><CardTitle>企业信息</CardTitle><CardDescription>用于联系页面、页脚和企业结构化数据。</CardDescription></CardHeader><CardContent className="grid gap-5 md:grid-cols-2"><div className="space-y-2 md:col-span-2"><Label htmlFor="companyName">公司名称</Label><Input id="companyName" name="companyName" defaultValue={settings.companyName} /></div><div className="space-y-2"><Label htmlFor="contactEmail">联系邮箱</Label><Input id="contactEmail" name="contactEmail" type="email" defaultValue={settings.contactEmail} /></div><div className="space-y-2"><Label htmlFor="contactPhone">联系电话</Label><Input id="contactPhone" name="contactPhone" defaultValue={settings.contactPhone} /></div><div className="space-y-2 md:col-span-2"><Label htmlFor="address">公司地址</Label><Textarea id="address" name="address" defaultValue={settings.address} /></div></CardContent></Card>
       <Button type="submit" size="lg">保存系统设置</Button>
     </form>
+    <Card className="mt-6 max-w-4xl"><CardHeader><CardTitle>Google Search Console</CardTitle><CardDescription>验证网站所有权并提交自动生成的站点地图。</CardDescription></CardHeader><CardContent className="space-y-5">
+      <div className={`rounded-xl border px-4 py-3 text-sm ${searchConsoleVerified ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>{searchConsoleVerified ? "Google 验证代码已配置，部署后页面会自动输出验证 Meta 标签。" : "尚未配置 GOOGLE_SITE_VERIFICATION。请使用 Search Console 的 HTML 标记验证方式。"}</div>
+      <div className="space-y-2"><Label>站点地图地址</Label><Input readOnly value={absoluteUrl("/sitemap.xml")} /><p className="text-xs text-slate-400">在 Search Console 的“站点地图”页面提交此地址。</p></div>
+      <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600"><li>打开 Google Search Console 并添加正式域名。</li><li>选择“HTML 标记”验证方式，只复制 content 属性中的代码。</li><li>将代码保存为部署环境变量 GOOGLE_SITE_VERIFICATION 并重新部署。</li><li>验证成功后提交上面的 sitemap.xml 地址。</li></ol>
+      <a className="inline-flex rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" href="https://search.google.com/search-console" target="_blank" rel="noreferrer">打开 Google Search Console ↗</a>
+    </CardContent></Card>
   </>;
 }

@@ -9,21 +9,21 @@ export default function BlogArticleTemplate({ article, children }) {
       <Header standalone />
 
       <header className="blog-masthead">
-        <div className="blog-breadcrumb"><Link href="/concept-b">Home</Link><span>/</span><Link href="/blog/custom-packaging-guide">Insights</Link><span>/</span><b>{article.category}</b></div>
+        <div className="blog-breadcrumb"><Link href="/concept-b">Home</Link><span>/</span><Link href="/blog">Insights</Link><span>/</span><b>{article.category}</b></div>
         <div className="blog-title-grid">
           <div><span>{article.category}</span><h1>{article.title}</h1></div>
           <p>{article.description}</p>
         </div>
         <div className="blog-meta"><span>By {article.author.name}</span><span>{article.published}</span><span>{article.readingTime}</span></div>
-        <div className="blog-hero-image"><Image src={article.heroImage} alt={article.heroAlt} fill priority sizes="(max-width: 900px) 100vw, 1296px" /></div>
+        <div className="blog-hero-image"><img src={article.heroImage} alt={article.heroAlt} fetchPriority="high" /></div>
       </header>
 
       <div className="blog-content-layout">
         <article className="blog-article">
-          <nav className="blog-toc" aria-label="Article table of contents">
+          {article.toc.length ? <nav className="blog-toc" aria-label="Article table of contents">
             <div><span>QUICK CONTENTS</span><strong>In this article</strong></div>
             <ol>{article.toc.map((item, index) => <li key={item.id}><a href={`#${item.id}`}><b>{String(index + 1).padStart(2, "0")}</b>{item.label}</a></li>)}</ol>
-          </nav>
+          </nav> : null}
           <p className="blog-lead">{article.lead}</p>
           {children}
         </article>

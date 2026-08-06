@@ -1,30 +1,23 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/cms/session";
-import { updateDatabase } from "@/lib/cms/storage";
+import { isDatabaseConfigured } from "@/lib/db/prisma";
+import { createMediaStorageKey, createR2Upload, mediaStorageMode, validateMediaMetadata } from "@/lib/media/storage";
 
-const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const maximumSize = 8 * 1024 * 1024;
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!(await getAdminSession())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const formData = await request.formData();
-  const file = formData.get("file");
-  const alt = typeof formData.get("alt") === "string" ? String(formData.get("alt")).trim().slice(0, 240) : "";
-  if (!(file instanceof File) || !allowedTypes.has(file.type) || file.size <= 0 || file.size > maximumSize) {
-    return NextResponse.redirect(new URL("/admin/media?error=file", request.url), 303);
+  if (!(await getAdminSession())) return NextResponse.json({ error: "请先登录后台" }, { status: 401 });
+  if (!isDatabaseConfigured()) return NextResponse.json({ error: "尚未配置 DATABASE_URL" }, { status: 503 });
+  const input = await request.json().catch(() => null) as { name?: string; type?: string; size?: number } | null;
+  const metadata = { name: String(input?.name || ""), type: String(input?.type || ""), size: Number(input?.size || 0) };
+  const error = validateMediaMetadata(metadata);
+  if (error) return NextResponse.json({ error }, { status: 400 });
+  const mode = mediaStorageMode();
+  if (!mode) return NextResponse.json({ error: "生产环境尚未配置 Cloudflare R2，且本地存储未启用" }, { status: 503 });
+  const storageKey = createMediaStorageKey(metadata.name, metadata.type);
+  if (mode === "R2") {
+    const signed = await createR2Upload(storageKey, metadata.type);
+    return NextResponse.json({ mode, storageKey, ...signed });
   }
-
-  const extension = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" } as Record<string, string>)[file.type];
-  const stem = path.basename(file.name, path.extname(file.name)).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "image";
-  const fileName = `${Date.now()}-${stem}-${randomUUID().slice(0, 8)}.${extension}`;
-  const uploadsDirectory = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadsDirectory, { recursive: true });
-  await writeFile(path.join(uploadsDirectory, fileName), Buffer.from(await file.arrayBuffer()), { flag: "wx" });
-  await updateDatabase((database) => {
-    database.media.unshift({ id: randomUUID(), name: file.name.slice(0, 240), url: `/uploads/${fileName}`, mimeType: file.type, size: file.size, alt, createdAt: new Date().toISOString() });
-  });
-  return NextResponse.redirect(new URL("/admin/media?uploaded=1", request.url), 303);
+  return NextResponse.json({ mode, storageKey, uploadUrl: "/api/admin/media/local" });
 }
