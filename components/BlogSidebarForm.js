@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { sendFormSubmitInquiry } from "@/lib/formsubmit-client";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const phonePattern = /^\+?[0-9\s().-]{7,25}$/;
@@ -9,7 +10,6 @@ export default function BlogSidebarForm() {
   const [values, setValues] = useState({ name: "", email: "", phone: "", website: "" });
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ type: "idle", message: "" });
-  const startedAt = useRef(Date.now());
 
   function update(event) {
     const { name, value } = event.target;
@@ -32,16 +32,9 @@ export default function BlogSidebarForm() {
 
     setStatus({ type: "loading", message: "Sending…" });
     try {
-      const response = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, product: "Blog consultation", message: "Inquiry submitted from the blog article sidebar.", startedAt: startedAt.current }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Submission failed.");
+      await sendFormSubmitInquiry({ ...values, product: "Blog consultation", message: "Inquiry submitted from the blog article sidebar." });
       setStatus({ type: "success", message: "Thank you. We’ll reply within one business day." });
       setValues({ name: "", email: "", phone: "", website: "" });
-      startedAt.current = Date.now();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Please try again or email us directly." });
     }

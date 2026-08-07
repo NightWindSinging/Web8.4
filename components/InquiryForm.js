@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { sendFormSubmitInquiry } from "@/lib/formsubmit-client";
 
 const initialValues = {
   name: "",
@@ -34,7 +35,6 @@ export default function InquiryForm() {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ type: "idle", message: "" });
-  const startedAt = useRef(Date.now());
 
   function update(event) {
     const { name, value } = event.target;
@@ -64,17 +64,10 @@ export default function InquiryForm() {
 
     setStatus({ type: "loading", message: "Sending your inquiry…" });
     try {
-      const response = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, startedAt: startedAt.current }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
+      await sendFormSubmitInquiry(values);
 
       setStatus({ type: "success", message: "Inquiry submitted successfully. Our team will reply within one business day." });
       setValues(initialValues);
-      startedAt.current = Date.now();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Submission failed. Please try again or email us directly." });
     }

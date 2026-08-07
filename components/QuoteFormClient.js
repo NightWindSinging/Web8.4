@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { sendFormSubmitInquiry } from "@/lib/formsubmit-client";
 
 const initialValues = { name: "", email: "", phone: "", country: "", product: "", message: "", website: "" };
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -9,7 +10,6 @@ const phonePattern = /^\+?[0-9\s().-]{7,25}$/;
 export default function QuoteFormClient({ compact = false, dark = false }) {
   const [values, setValues] = useState(initialValues);
   const [status, setStatus] = useState({ type: "idle", message: "" });
-  const startedAt = useRef(Date.now());
 
   function update(event) {
     const { name, value } = event.target;
@@ -26,16 +26,9 @@ export default function QuoteFormClient({ compact = false, dark = false }) {
 
     setStatus({ type: "loading", message: "Sending your inquiry…" });
     try {
-      const response = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, startedAt: startedAt.current }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Submission failed.");
+      await sendFormSubmitInquiry(values, { subject: `[Website Contact] ${values.product || "Custom Packaging"} — ${values.name}` });
       setStatus({ type: "success", message: "Inquiry sent. We’ll reply within one business day." });
       setValues(initialValues);
-      startedAt.current = Date.now();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Please try again or email us directly." });
     }
