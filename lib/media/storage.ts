@@ -5,6 +5,7 @@ import { lstat, mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { del, head } from "@vercel/blob";
 import type { MediaStorageProvider } from "@/lib/generated/prisma";
 
 export const MEDIA_MAX_BYTES = 10 * 1024 * 1024;
@@ -33,6 +34,7 @@ function r2Client(config: R2Config) {
 }
 
 export function mediaStorageMode(): MediaStorageProvider | null {
+  if (process.env.BLOB_READ_WRITE_TOKEN?.trim()) return "BLOB";
   if (r2Config()) return "R2";
   if (process.env.NODE_ENV !== "production" || process.env.MEDIA_LOCAL_STORAGE === "true") return "LOCAL";
   return null;
@@ -72,6 +74,18 @@ export async function verifyR2Upload(key: string, expectedType: string, expected
   if (object.ContentLength !== expectedSize || object.ContentType !== expectedType) throw new Error("R2 object metadata does not match the requested upload.");
 }
 
+export async function verifyVercelBlobUpload(url: string, expectedType: string, expectedSize: number) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error("Vercel Blob URL is invalid.");
+  }
+  if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".blob.vercel-storage.com")) throw new Error("Vercel Blob URL is invalid.");
+  const object = await head(url);
+  if (object.size !== expectedSize || object.contentType !== expectedType) throw new Error("Vercel Blob metadata does not match the uploaded image.");
+}
+
 function safeLocalPath(key: string) {
   const uploadsRoot = path.resolve(process.cwd(), "public", "uploads");
   const filePath = path.resolve(uploadsRoot, key);
@@ -86,8 +100,12 @@ export async function writeLocalMedia(key: string, bytes: Buffer) {
   return `/uploads/${key}`;
 }
 
-export async function deleteStoredMedia(provider: MediaStorageProvider, key: string | null) {
+export async function deleteStoredMedia(provider: MediaStorageProvider, key: string | null, url?: string | null) {
   if (!key) return;
+  if (provider === "BLOB") {
+    await del(url || key);
+    return;
+  }
   if (provider === "R2") {
     const config = r2Config();
     if (!config) throw new Error("R2 credentials are required to delete this object.");

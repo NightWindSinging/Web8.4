@@ -7,7 +7,7 @@ import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
 import { MEDIA_UPLOAD_ACCEPT, MEDIA_UPLOAD_MAX_BYTES, uploadMediaFile } from "@/lib/media/upload-client";
 
-export default function MediaUploader({ storageMode }: { storageMode: "R2" | "LOCAL" | null }) {
+export default function MediaUploader({ storageMode }: { storageMode: "BLOB" | "R2" | "LOCAL" | null }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);

@@ -13,8 +13,9 @@ export async function POST(request: Request) {
   const error = validateMediaMetadata(metadata);
   if (error) return NextResponse.json({ error }, { status: 400 });
   const mode = mediaStorageMode();
-  if (!mode) return NextResponse.json({ error: "生产环境尚未配置 Cloudflare R2，且本地存储未启用" }, { status: 503 });
+  if (!mode) return NextResponse.json({ error: "生产环境尚未配置 Vercel Blob 或 Cloudflare R2，且本地存储未启用" }, { status: 503 });
   const storageKey = createMediaStorageKey(metadata.name, metadata.type);
+  if (mode === "BLOB") return NextResponse.json({ mode, storageKey, uploadUrl: "/api/admin/media/blob" });
   if (mode === "R2") {
     const signed = await createR2Upload(storageKey, metadata.type);
     return NextResponse.json({ mode, storageKey, ...signed });

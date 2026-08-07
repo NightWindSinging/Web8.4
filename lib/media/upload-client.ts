@@ -1,3 +1,5 @@
+import { upload } from "@vercel/blob/client";
+
 export const MEDIA_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
 export const MEDIA_UPLOAD_ACCEPT = "image/jpeg,image/png,image/webp";
 
@@ -6,7 +8,7 @@ export type UploadedMedia = {
   name: string;
   url: string;
   storageKey: string;
-  storageProvider: "R2" | "LOCAL";
+  storageProvider: "BLOB" | "R2" | "LOCAL";
   mimeType: string;
   size: number | null;
   width: number | null;
@@ -43,7 +45,20 @@ export async function uploadMediaFile(file: File, alt = ""): Promise<UploadedMed
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: file.name, type: file.type, size: file.size }),
-  })) as { mode: "R2" | "LOCAL"; storageKey: string; uploadUrl: string };
+  })) as { mode: "BLOB" | "R2" | "LOCAL"; storageKey: string; uploadUrl: string };
+
+  if (initiation.mode === "BLOB") {
+    const blob = await upload(initiation.storageKey, file, {
+      access: "public",
+      contentType: file.type,
+      handleUploadUrl: initiation.uploadUrl,
+    });
+    return jsonResponse(await fetch("/api/admin/media/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: "BLOB", blobUrl: blob.url, name: file.name, type: file.type, size: file.size, alt, ...imageSize }),
+    })) as Promise<UploadedMedia>;
+  }
 
   if (initiation.mode === "R2") {
     const uploadResponse = await fetch(initiation.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
@@ -51,7 +66,7 @@ export async function uploadMediaFile(file: File, alt = ""): Promise<UploadedMed
     return jsonResponse(await fetch("/api/admin/media/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ storageKey: initiation.storageKey, name: file.name, type: file.type, size: file.size, alt, ...imageSize }),
+      body: JSON.stringify({ provider: "R2", storageKey: initiation.storageKey, name: file.name, type: file.type, size: file.size, alt, ...imageSize }),
     })) as Promise<UploadedMedia>;
   }
 

@@ -19,7 +19,7 @@ export async function deleteDatabaseMediaAction(id: string) {
   await prisma.media.delete({ where: { id } });
   let storageWarning = false;
   try {
-    await deleteStoredMedia(media.storageProvider, media.storageKey);
+    await deleteStoredMedia(media.storageProvider, media.storageKey, media.url);
   } catch (error) {
     storageWarning = true;
     console.error(`Media object cleanup failed for ${media.storageKey}`, error);
