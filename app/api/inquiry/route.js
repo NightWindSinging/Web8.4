@@ -51,7 +51,9 @@ export async function POST(request) {
   if (!EMAIL_PATTERN.test(inquiry.email)) return Response.json({ error: "Please enter a valid email address." }, { status: 400 });
   if (!PHONE_PATTERN.test(inquiry.phone)) return Response.json({ error: "Please enter a valid international phone number." }, { status: 400 });
 
-  const toEmail = process.env.INQUIRY_TO_EMAIL || "lynn05052002@gmail.com";
+  const formId = process.env.FORMSUBMIT_FORM_ID || "d250726a483bc7d236fa52601e012021";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+  const sourceUrl = request.headers.get("referer") || `${siteUrl.replace(/\/$/, "")}/inquiry`;
   const formData = new URLSearchParams({
     _subject: `[Website Inquiry] ${inquiry.product || "Custom Packaging"} — ${inquiry.company || inquiry.name}`,
     _template: "table",
@@ -64,18 +66,24 @@ export async function POST(request) {
     "Country / region": inquiry.country || "—",
     "Product requirement": inquiry.product || "—",
     Message: inquiry.message || "—",
-    "Submitted from": request.headers.get("referer") || "DATANGXING website",
+    "Submitted from": sourceUrl,
   });
 
-  const emailResponse = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(toEmail)}`, {
+  const emailResponse = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(formId)}`, {
     method: "POST",
-    headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      Origin: new URL(siteUrl).origin,
+      Referer: sourceUrl,
+    },
     body: formData,
     cache: "no-store",
   });
 
   const result = await emailResponse.json().catch(() => null);
-  if (!emailResponse.ok) {
+  const formSubmitSucceeded = result?.success === true || result?.success === "true";
+  if (!emailResponse.ok || !formSubmitSucceeded) {
     return Response.json({ error: "We could not send your inquiry. Please try again or email us directly." }, { status: 502 });
   }
 
