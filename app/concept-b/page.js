@@ -26,7 +26,7 @@ export default function ConceptB() {
       <section className="wb2b-hero">
         <div className="wb2b-hero-copy">
           <span>Custom paper packaging manufacturer</span>
-          <h1>Built to spec.<br />Ready for market.</h1>
+          <h1>Custom Packaging.<br />Built for Your Brand.</h1>
           <p>From structural engineering and sampling to mass production and global shipment — one accountable packaging partner.</p>
           <div className="wb2b-actions">
             <Link className="primary" href="/inquiry">Request a fast quote</Link>
@@ -35,8 +35,8 @@ export default function ConceptB() {
           <small>Replies within 1 business day · Files kept confidential</small>
         </div>
         <Link className="wb2b-featured" href="/products/rigid-gift-boxes">
-          <span className="wb2b-featured-image"><Image src="/assets/tech-rigid-box.jpg" alt="Custom technology rigid gift box with branded paper bag" fill loading="eager" sizes="(max-width: 900px) 100vw, 48vw" /></span>
-          <span className="wb2b-featured-copy"><small>Featured build</small><strong>Custom rigid box + branded paper bag</strong></span>
+          <span className="wb2b-featured-image"><Image src="/assets/custom-white-rigid-box-packaging.png" alt="Custom white rigid gift box packaging with fitted inserts" fill loading="eager" sizes="(max-width: 900px) 100vw, 48vw" /></span>
+          <span className="wb2b-featured-copy"><small>Featured build</small><strong>Custom rigid box packaging system</strong></span>
         </Link>
         <div className="wb2b-proof" aria-label="Company capabilities">
           <div><strong>20+</strong><span>Specialists</span></div>
