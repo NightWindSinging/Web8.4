@@ -22,14 +22,14 @@ function menuSummary(value) {
 export function Brand({ inverse = false, href = "/concept-b" }) {
   return (
     <Link className="brand" href={href} aria-label="DATANGXING Packaging home">
-      <span className="brand-mark"><Image src="/assets/logo-square.jpg" alt="DATANGXING Packaging logo" fill loading="eager" sizes="54px" /></span>
-      <span className="brand-copy"><strong>DATANGXING</strong><small>PACKAGING SOLUTIONS</small></span>
+      <span className="brand-mark"><Image src="/assets/datangxing-logo-2026.jpg" alt="大唐兴包装 DATANGXING Packaging logo" fill loading="eager" sizes="80px" /></span>
     </Link>
   );
 }
 
-export async function Header({ dark = false, standalone = false, ctaHref = "" }) {
+export async function Header({ dark = false, standalone = false, ctaHref = "", variant = "modern" }) {
   const premiumMenu = true;
+  const isModern = variant === "modern";
   const sectionPrefix = standalone ? "/concept-b" : "";
   const resolvedCtaHref = ctaHref || "/inquiry";
   const navigationCategories = await getNavigationCategories();
@@ -52,7 +52,7 @@ export async function Header({ dark = false, standalone = false, ctaHref = "" })
     image: "/assets/luxury-gift-box-square.jpg",
   };
   return (
-    <header className={`site-header ${dark ? "dark" : ""} ${premiumMenu ? "mega-header" : ""}`} data-scroll-header>
+    <header className={`site-header ${dark ? "dark" : ""} ${premiumMenu ? "mega-header" : ""} ${isModern ? "modern-header" : ""}`} data-scroll-header>
       <HeaderScrollBehavior />
       <Brand inverse={dark} />
       <nav className={premiumMenu ? "mega-nav" : ""} aria-label="Primary navigation">
@@ -87,11 +87,12 @@ export async function Header({ dark = false, standalone = false, ctaHref = "" })
             </div>
           </details>
         ) : <a href="#products">Products</a>}
-        <a href={`${sectionPrefix}#solutions`}>Solutions</a>
-        <a href={`${sectionPrefix}#factory`}>Factory</a>
-        <a href={`${sectionPrefix}#about`}>About</a>
-        <Link href="/contact">Contact</Link>
+        <a href={isModern ? `${sectionPrefix}#products` : `${sectionPrefix}#solutions`}>{isModern ? "Industries" : "Solutions"}</a>
+        {isModern && <a href={`${sectionPrefix}#solutions`}>Capabilities</a>}
+        {isModern ? <Link href="/factory">Factory</Link> : <a href={`${sectionPrefix}#factory`}>Factory</a>}
+        {isModern ? <><Link href="/blog">Blog</Link><Link href="/contact">Contact</Link></> : <><a href={`${sectionPrefix}#about`}>About</a><Link href="/contact">Contact</Link></>}
       </nav>
+      {isModern && <span className="mobile-quick-links"><Link href="/blog">Blog</Link><Link href="/contact">Contact</Link></span>}
       <a className="header-cta" href={resolvedCtaHref}>Get a Quote <span>↗</span></a>
     </header>
   );
@@ -148,7 +149,7 @@ export function Footer({ dark = false }) {
       <footer className={dark ? "dark" : ""}>
         <Brand inverse={dark} />
         <div><strong>Custom Paper Packaging</strong><Link href="/products/rigid-gift-boxes">Rigid Boxes</Link><Link href="/products#folding-cartons">Folding Cartons</Link><Link href="/products#paper-bags">Paper Bags</Link></div>
-        <div><strong>Company</strong><a href="#about">About Us</a><a href="#factory">Factory</a><Link href="/blog">Insights</Link><Link href="/contact">Contact Lynn</Link><Link href="/inquiry">Start an Inquiry</Link></div>
+        <div><strong>Company</strong><a href="/concept-b#about">About Us</a><Link href="/factory">Factory</Link><Link href="/blog">Blog</Link><Link href="/contact">Contact Lynn</Link><Link href="/inquiry">Start an Inquiry</Link></div>
         <div className="footer-contact"><strong>Let’s build better packaging.</strong><a href="mailto:lynn05052002@gmail.com">lynn05052002@gmail.com</a><span>Shenzhen, Guangdong, China</span></div>
         <small>© 2026 Shenzhen Datangxing Printing & Packaging Co., Ltd.</small>
       </footer>

@@ -16,3 +16,4 @@ data/cms/*.tmp
 public/uploads/*
 !public/uploads/.gitkeep
 lib/generated/prisma/
+.vercel
