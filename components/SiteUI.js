@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import HeaderScrollBehavior from "./HeaderScrollBehavior";
+import MobileNavigation from "./MobileNavigation";
 import QuoteFormClient from "./QuoteFormClient";
 import WhatsAppButton from "./WhatsAppButton";
 import { getNavigationCategories } from "@/lib/cms/public-categories";
@@ -93,7 +94,7 @@ export async function Header({ dark = false, standalone = false, ctaHref = "", v
         {isModern ? <Link href="/factory">Factory</Link> : <a href={`${sectionPrefix}#factory`}>Factory</a>}
         {isModern ? <><Link href="/blog">Blog</Link><Link href="/contact">Contact</Link></> : <><a href={`${sectionPrefix}#about`}>About</a><Link href="/contact">Contact</Link></>}
       </nav>
-      {isModern && <span className="mobile-quick-links"><Link href="/blog">Blog</Link><Link href="/contact">Contact</Link></span>}
+      {isModern && <MobileNavigation sectionPrefix={sectionPrefix} products={packagingTypes} ctaHref={resolvedCtaHref} />}
       <a className="header-cta" href={resolvedCtaHref}>Get a Quote <span>↗</span></a>
     </header>
   );
