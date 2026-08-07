@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import HeaderScrollBehavior from "./HeaderScrollBehavior";
+import QuoteFormClient from "./QuoteFormClient";
 import WhatsAppButton from "./WhatsAppButton";
 import { getNavigationCategories } from "@/lib/cms/public-categories";
 
@@ -113,20 +114,7 @@ export function Img({ src, alt, className = "" }) {
 }
 
 export function QuoteForm({ compact = false, dark = false }) {
-  return (
-    <form className={`quote-form ${compact ? "compact" : ""} ${dark ? "dark" : ""}`} action="#quote" id="quote">
-      <div className="form-head"><span>Start your project</span><strong>Get a response within 24 hours</strong></div>
-      <div className="form-grid">
-        <label><span>Name</span><input name="name" placeholder="Your name" /></label>
-        <label><span>Work email</span><input name="email" type="email" placeholder="name@company.com" /></label>
-        <label><span>Country</span><input name="country" placeholder="Your market" /></label>
-        <label><span>Packaging type</span><select name="type" defaultValue=""><option value="" disabled>Select product</option><option>Rigid gift box</option><option>Folding carton</option><option>Display box</option><option>Paper bag</option></select></label>
-      </div>
-      {!compact && <label className="wide"><span>Project details</span><textarea name="message" placeholder="Size, quantity, material, printing and deadline..." /></label>}
-      <button type="submit">Request a Custom Quote <span>→</span></button>
-      <small>By submitting, you agree to be contacted about your packaging request.</small>
-    </form>
-  );
+  return <QuoteFormClient compact={compact} dark={dark} />;
 }
 
 export const products = [
